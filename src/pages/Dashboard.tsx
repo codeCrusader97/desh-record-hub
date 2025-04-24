@@ -2,7 +2,7 @@
 import React from 'react';
 import Layout from '@/components/Layout';
 import DashboardStat from '@/components/DashboardStat';
-import { Printer, FileText, Scan, Upload, Type } from 'lucide-react';
+import { Printer, FileText, Scan, Upload, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,10 +18,10 @@ export default function Dashboard() {
       icon: <Printer size={24} />
     },
     { 
-      title: "ডকুমেন্ট টাইপিং",
+      title: "সংরক্ষিত ডকুমেন্ট",
       value: 12,
-      subtitle: "আজ",
-      icon: <Type size={24} />
+      subtitle: "মোট",
+      icon: <FolderOpen size={24} />
     },
     { 
       title: "স্ক্যান করা হয়েছে",
@@ -82,16 +82,16 @@ export default function Dashboard() {
           <Button 
             variant="outline" 
             className="h-auto p-4 flex flex-col items-center hover:bg-court-light"
-            onClick={() => navigate('/typing')}
+            onClick={() => navigate('/documents')}
           >
-            <Type size={28} className="mb-2 text-court" />
-            <span>টাইপিং</span>
+            <FolderOpen size={28} className="mb-2 text-court" />
+            <span>সংরক্ষিত ডকুমেন্ট</span>
           </Button>
           
           <Button 
             variant="outline" 
             className="h-auto p-4 flex flex-col items-center hover:bg-court-light"
-            onClick={() => navigate('/documents')}
+            onClick={() => navigate('/templates')}
           >
             <FileText size={28} className="mb-2 text-court" />
             <span>ফর্ম টেমপ্লেট</span>

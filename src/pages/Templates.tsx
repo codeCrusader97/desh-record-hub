@@ -4,14 +4,25 @@ import Layout from '@/components/Layout';
 import DocumentEditor from '@/components/DocumentEditor';
 import TemplatesSidebar from '@/components/TemplatesSidebar';
 import { Button } from '@/components/ui/button';
-import { Download, Printer, Save } from 'lucide-react';
+import { Download, Printer, Save, FolderOpen } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { legalTemplates } from '@/types/template';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function Templates() {
   const [selectedTemplate, setSelectedTemplate] = React.useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  React.useEffect(() => {
+    // Check if we have template parameter in URL
+    const templateFromParams = searchParams.get('template');
+    if (templateFromParams) {
+      setSelectedTemplate(templateFromParams);
+    }
+  }, [searchParams]);
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
@@ -31,6 +42,10 @@ export default function Templates() {
     });
   };
 
+  const handleGoToSavedDocuments = () => {
+    navigate('/documents');
+  };
+
   return (
     <Layout>
       <div className="flex flex-col md:flex-row h-full gap-4">
@@ -42,9 +57,20 @@ export default function Templates() {
         />
         
         <div className="flex-1 flex flex-col">
-          <h1 className="text-2xl font-serif font-bold text-court mb-4">
-            {selectedTemplate ? 'টেমপ্লেট সম্পাদনা করুন' : 'টেমপ্লেট নির্বাচন করুন'}
-          </h1>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+            <h1 className="text-2xl font-serif font-bold text-court mb-2 md:mb-0">
+              {selectedTemplate ? 'টেমপ্লেট সম্পাদনা করুন' : 'টেমপ্লেট নির্বাচন করুন'}
+            </h1>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleGoToSavedDocuments}
+              className="gap-2 mb-4 md:mb-0"
+            >
+              <FolderOpen className="h-4 w-4" />
+              <span>সেভড ডকুমেন্টস</span>
+            </Button>
+          </div>
           
           {selectedTemplate ? (
             <>

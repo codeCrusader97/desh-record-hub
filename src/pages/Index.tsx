@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ServiceCard from '@/components/ServiceCard';
 import Layout from '@/components/Layout';
-import { Printer, FileText, Scan, Type, Upload, Receipt, User } from 'lucide-react';
+import { Printer, FileText, Scan, FolderOpen, Upload, Receipt, User } from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -21,10 +22,10 @@ const Index = () => {
       path: "/scan"
     },
     {
-      icon: <Type size={40} />,
-      title: "টাইপিং সার্ভিস",
-      description: "বাংলা ও ইংরেজিতে লিগ্যাল দলিল টাইপিং",
-      path: "/typing"
+      icon: <FolderOpen size={40} />,
+      title: "সেভড ডকুমেন্টস",
+      description: "আপনার সংরক্ষিত দলিল দেখুন এবং সম্পাদনা করুন",
+      path: "/documents"
     },
     {
       icon: <FileText size={40} />,

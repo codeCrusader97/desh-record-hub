@@ -10,6 +10,8 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import PrintService from "./pages/PrintService";
 import Templates from "./pages/Templates";
+import SavedDocuments from "./pages/SavedDocuments";
+import ViewDocument from "./pages/ViewDocument";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -28,6 +30,8 @@ const App = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/print" element={<PrintService />} />
               <Route path="/templates" element={<Templates />} />
+              <Route path="/documents" element={<SavedDocuments />} />
+              <Route path="/documents/view/:id" element={<ViewDocument />} />
               <Route path="/login" element={<Login />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
