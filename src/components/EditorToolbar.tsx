@@ -14,7 +14,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.chain().focus().toggleBold().run()}
+        onClick={() => editor.chain().focus().setBold().run()}
         className={editor.isActive('bold') ? 'bg-gray-200' : ''}
       >
         <Bold className="h-4 w-4" />
@@ -23,7 +23,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
+        onClick={() => editor.chain().focus().setItalic().run()}
         className={editor.isActive('italic') ? 'bg-gray-200' : ''}
       >
         <Italic className="h-4 w-4" />
@@ -32,7 +32,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        onClick={() => editor.chain().focus().setUnderline().run()}
         className={editor.isActive('underline') ? 'bg-gray-200' : ''}
       >
         <Underline className="h-4 w-4" />
