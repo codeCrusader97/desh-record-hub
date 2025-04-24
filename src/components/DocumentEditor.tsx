@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -5,73 +6,80 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import EditorToolbar from './EditorToolbar';
 import { legalTemplates } from '@/types/template';
-import { useToast } from "@/hooks/use-toast";
 import { useSearchParams } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
+import { useDocumentManager } from '@/hooks/useDocumentManager';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface DocumentEditorProps {
   templateId: string;
 }
 
 export default function DocumentEditor({ templateId }: DocumentEditorProps) {
-  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const docId = searchParams.get('doc');
-  const [documentTitle, setDocumentTitle] = useState<string>('');
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [customTitle, setCustomTitle] = useState('');
+  const [lastAutoSave, setLastAutoSave] = useState<NodeJS.Timeout>();
   
-  // Initialize editor with needed extensions
+  const {
+    documentTitle,
+    setDocumentTitle,
+    saveDraft,
+    saveDocument,
+    loadDraft,
+    generateDefaultTitle
+  } = useDocumentManager({ templateId, docId });
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
+        types: ['heading', 'paragraph']
+      })
     ],
     content: '<p>টেমপ্লেট লোড হচ্ছে...</p>',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg mx-auto focus:outline-none min-h-[500px] p-4',
-      },
+        class: 'prose prose-sm sm:prose lg:prose-lg mx-auto focus:outline-none min-h-[500px] p-4'
+      }
     },
     onUpdate: ({ editor }) => {
-      // Autosave functionality
-      saveDocument(editor.getHTML());
-      toast({
-        description: "পরিবর্তনগুলি স্বয়ংক্রিয়ভাবে সংরক্ষিত হচ্ছে...",
-      });
-    },
+      // Clear previous timeout if it exists
+      if (lastAutoSave) {
+        clearTimeout(lastAutoSave);
+      }
+      
+      // Set new timeout for autosave
+      const timeout = setTimeout(() => {
+        saveDraft(editor.getHTML());
+      }, 2000); // Autosave after 2 seconds of inactivity
+      
+      setLastAutoSave(timeout);
+    }
   });
 
-  // Save document to localStorage with metadata
-  const saveDocument = (content: string) => {
-    if (!templateId) return;
-    
-    // Get or create document ID
-    const documentId = docId || `new-${uuidv4()}`;
-    
-    // Get template info for title
-    const selectedTemplate = legalTemplates
-      .flatMap(group => group.templates)
-      .find(template => template.id === templateId);
-    
-    // Create document object
-    const documentData = {
-      title: documentTitle || selectedTemplate?.title || 'অজানা ডকুমেন্ট',
-      content: content,
-      lastEdited: new Date().toISOString(),
-      templateId: templateId
-    };
-    
-    // Save to localStorage
-    localStorage.setItem(`template-doc-${documentId}`, JSON.stringify(documentData));
-  };
-
   useEffect(() => {
-    // If we have a document ID, try to load it
-    if (docId && editor) {
+    if (!editor) return;
+
+    // Check for draft first
+    const draftContent = loadDraft();
+    if (draftContent) {
+      editor.commands.setContent(draftContent);
+      return;
+    }
+
+    // If no draft, load saved document or template
+    if (docId) {
       const savedDoc = localStorage.getItem(`template-doc-${docId}`);
-      
       if (savedDoc) {
         const parsedDoc = JSON.parse(savedDoc);
         editor.commands.setContent(parsedDoc.content);
@@ -79,17 +87,36 @@ export default function DocumentEditor({ templateId }: DocumentEditorProps) {
         return;
       }
     }
-    
-    // Otherwise load from template
+
+    // Load from template if no saved document
     const selectedTemplate = legalTemplates
       .flatMap(group => group.templates)
       .find(template => template.id === templateId);
 
-    if (selectedTemplate && editor) {
+    if (selectedTemplate) {
       editor.commands.setContent(selectedTemplate.content);
       setDocumentTitle(selectedTemplate.title);
     }
-  }, [templateId, editor, docId]);
+  }, [templateId, editor, docId, loadDraft]);
+
+  const handleSave = () => {
+    if (!editor) return;
+    const title = customTitle || generateDefaultTitle();
+    saveDocument(editor.getHTML(), title);
+    setSaveDialogOpen(false);
+  };
+
+  useEffect(() => {
+    const handleKeyboard = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        setSaveDialogOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyboard);
+    return () => window.removeEventListener('keydown', handleKeyboard);
+  }, []);
 
   if (!editor) {
     return null;
@@ -97,15 +124,32 @@ export default function DocumentEditor({ templateId }: DocumentEditorProps) {
 
   return (
     <div className="flex flex-col h-full">
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>ডকুমেন্ট সংরক্ষণ করুন</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={customTitle}
+            onChange={(e) => setCustomTitle(e.target.value)}
+            placeholder={generateDefaultTitle()}
+            className="mt-4"
+          />
+          <DialogFooter>
+            <Button onClick={() => setSaveDialogOpen(false)} variant="outline">
+              বাতিল
+            </Button>
+            <Button onClick={handleSave}>
+              সংরক্ষণ করুন
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <input
         type="text"
         value={documentTitle}
-        onChange={(e) => {
-          setDocumentTitle(e.target.value);
-          if (editor.getHTML()) {
-            saveDocument(editor.getHTML());
-          }
-        }}
+        onChange={(e) => setDocumentTitle(e.target.value)}
         className="w-full p-3 text-xl font-serif font-bold border-b focus:outline-none focus:border-court mb-2"
         placeholder="ডকুমেন্টের শিরোনাম..."
       />

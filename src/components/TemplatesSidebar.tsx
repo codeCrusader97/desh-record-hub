@@ -3,6 +3,11 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
 import { TemplateGroup } from '@/types/template';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 interface TemplatesSidebarProps {
   isOpen: boolean;
@@ -19,24 +24,27 @@ export default function TemplatesSidebar({
 }: TemplatesSidebarProps) {
   return (
     <div className={`
-      bg-white rounded-lg shadow-md transition-all duration-300
+      bg-white rounded-lg shadow-md transition-all duration-300 overflow-hidden
       ${isOpen ? 'w-full md:w-64' : 'w-full md:w-12'}
     `}>
-      <div className="p-4 border-b">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-between"
-          onClick={onToggle}
-        >
-          <span className={isOpen ? 'block' : 'hidden md:block'}>
-            টেমপ্লেট সমূহ
-          </span>
-          <FileText className="h-5 w-5" />
-        </Button>
-      </div>
+      <Collapsible
+        open={isOpen}
+        onOpenChange={onToggle}
+        className="w-full"
+      >
+        <CollapsibleTrigger asChild>
+          <Button 
+            variant="ghost" 
+            className="w-full justify-between p-4"
+          >
+            <span className={isOpen ? 'block' : 'hidden md:hidden'}>
+              টেমপ্লেট সমূহ
+            </span>
+            <FileText className="h-5 w-5" />
+          </Button>
+        </CollapsibleTrigger>
 
-      {isOpen && (
-        <div className="p-2">
+        <CollapsibleContent className="p-2">
           {templates.map((group, index) => (
             <div key={index} className="mb-4">
               <h3 className="px-2 mb-2 text-sm font-medium text-gray-500">
@@ -58,8 +66,8 @@ export default function TemplatesSidebar({
               ))}
             </div>
           ))}
-        </div>
-      )}
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
