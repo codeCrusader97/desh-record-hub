@@ -2,22 +2,21 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
+import { TemplateGroup } from '@/types/template';
 
 interface TemplatesSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onSelectTemplate: (templateId: string) => void;
+  templates: TemplateGroup[];
 }
 
-const templates = [
-  { id: 'bail', name: 'জামিনের আবেদন' },
-  { id: 'rent', name: 'ভাড়ার চুক্তিপত্র' },
-  { id: 'affidavit', name: 'হলফনামা' },
-  { id: 'power-of-attorney', name: 'পাওয়ার অফ অ্যাটর্নি' },
-  { id: 'legal-notice', name: 'লিগ্যাল নোটিশ' },
-];
-
-export default function TemplatesSidebar({ isOpen, onToggle, onSelectTemplate }: TemplatesSidebarProps) {
+export default function TemplatesSidebar({ 
+  isOpen, 
+  onToggle, 
+  onSelectTemplate,
+  templates 
+}: TemplatesSidebarProps) {
   return (
     <div className={`
       bg-white rounded-lg shadow-md transition-all duration-300
@@ -38,16 +37,26 @@ export default function TemplatesSidebar({ isOpen, onToggle, onSelectTemplate }:
 
       {isOpen && (
         <div className="p-2">
-          {templates.map((template) => (
-            <Button
-              key={template.id}
-              variant="ghost"
-              className="w-full justify-start text-left mb-1 h-auto py-3"
-              onClick={() => onSelectTemplate(template.id)}
-            >
-              <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate">{template.name}</span>
-            </Button>
+          {templates.map((group, index) => (
+            <div key={index} className="mb-4">
+              <h3 className="px-2 mb-2 text-sm font-medium text-gray-500">
+                {group.title}
+              </h3>
+              {group.templates.map((template) => (
+                <Button
+                  key={template.id}
+                  variant="ghost"
+                  className="w-full justify-start text-left mb-1 h-auto py-3"
+                  onClick={() => onSelectTemplate(template.id)}
+                >
+                  <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <div>
+                    <div className="font-medium">{template.title}</div>
+                    <div className="text-xs text-gray-500">{template.description}</div>
+                  </div>
+                </Button>
+              ))}
+            </div>
           ))}
         </div>
       )}

@@ -5,12 +5,16 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import EditorToolbar from './EditorToolbar';
+import { legalTemplates } from '@/types/template';
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentEditorProps {
   templateId: string;
 }
 
 export default function DocumentEditor({ templateId }: DocumentEditorProps) {
+  const { toast } = useToast();
+  
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -19,24 +23,30 @@ export default function DocumentEditor({ templateId }: DocumentEditorProps) {
         types: ['heading', 'paragraph'],
       }),
     ],
-    content: '<p>Loading template content...</p>',
+    content: '<p>টেমপ্লেট লোড হচ্ছে...</p>',
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg mx-auto focus:outline-none min-h-[500px] p-4',
       },
     },
+    onUpdate: ({ editor }) => {
+      // Autosave functionality
+      localStorage.setItem(`template-${templateId}`, editor.getHTML());
+      toast({
+        description: "পরিবর্তনগুলি স্বয়ংক্রিয়ভাবে সংরক্ষিত হচ্ছে...",
+      });
+    },
   });
 
   React.useEffect(() => {
-    // Here we would load the template content based on templateId
-    // For now using placeholder content
-    const content = `
-      <h1>আদালতের আবেদন</h1>
-      <p>মহামান্য আদালত সমীপে,</p>
-      <p>বিনীত নিবেদন এই যে...</p>
-    `;
-    
-    editor?.commands.setContent(content);
+    const selectedTemplate = legalTemplates
+      .flatMap(group => group.templates)
+      .find(template => template.id === templateId);
+
+    if (selectedTemplate && editor) {
+      const savedContent = localStorage.getItem(`template-${templateId}`);
+      editor.commands.setContent(savedContent || selectedTemplate.content);
+    }
   }, [templateId, editor]);
 
   if (!editor) {

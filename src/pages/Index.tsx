@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ServiceCard from '@/components/ServiceCard';
@@ -31,7 +30,7 @@ const Index = () => {
       icon: <FileText size={40} />,
       title: "লিগ্যাল টেমপ্লেট",
       description: "আইনি ফর্ম ও দলিলের প্রস্তুত টেমপ্লেট",
-      path: "/documents"
+      path: "/templates"
     },
     {
       icon: <Receipt size={40} />,
